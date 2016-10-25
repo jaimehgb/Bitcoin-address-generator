@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        
+    	<meta charset="UTF-8">
+    	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+    	<meta name="viewport" content="width=device-width, initial-scale=1">
+    	<link rel="stylesheet" href="bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    
+    	
+    	<script src="jquery.min.js"></script>
+    	<script src="bootstrap.min.js"></script>
+    	<script src='bitcoinjs.min.js'></script>
+    	
+    	<title><?php echo $title; ?></title>
+    </head>
+    
+    <body>
+        <div class="main">
+            <div class="col-sm-12">
+                <div class="col-sm-12">
+                    <h3>Generate Bitcoin Key Pairs</h3>
+                    <hr/>
+                    <form method="post" class="form-generate">
+                        <div class="form-group">
+                            <label>Number of addresses</label>
+                            <input type="text" name="number" id="number" class="form-control" value=1000>
+                        </div>
+                        <div class="form-group">
+                            <label>Update interval <small>(if small, worse performance. If too big browser can crash)</small></label>
+                            <input type="text" name="interval" id='interval' class="form-control" value=50>
+                        </div>
+                        <div class="form-group">
+                            <input type="submit" name="generate" class="btn btn-primary" value="Generate">
+                        </div>
+                    </form>
+                    <form method="post" class="form-stop">
+                        <div class="form-group">
+                            <input type="submit" class="btn btn-danger" value="STOP">
+                        </div>
+                    </form>
+                    <hr/>
+                </div>
+            </div>
+            
+            <hr/>
+            <div class="form-group text-center">
+                <h3>Execution time: <span id='time'></span></h3>
+                <h4>Addresses generated so far: <span id='count'></span></h4>
+            </div>
+            <hr/>
+            
+            <div class="col-sm-12">
+                <div class="col-sm-4">
+                    <h3>Public addresses</h3>
+                    <div class="col-xs-12">
+                        <div class="form-group">
+                            <textarea class="form-control" style="height:300px" id="public"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <h3>Private Keys</h3>
+                    <div class="col-xs-12">
+                        <div class="form-group">
+                            <textarea class="form-control" style="height:300px" id="private"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <h3>Public addresses<span><small>(Dot comma separated)</small></span></h3> 
+                    <div class="col-xs-12">
+                        <div class="form-group">
+                            <textarea class="form-control" style="height:300px" id="separated"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        
+        <script>
+            
+            running = true;
+            $('.form-stop').submit(function(){
+                running = false;    
+                return false;
+            });
+            
+            $('.form-generate').submit(function() {
+                
+                // globals
+                publics = $('#public');
+                privates = $('#private');
+                commas = $('#separated');
+                counthtml = $('#count');
+                running = true;
+                
+                start = new Date().getTime();
+                
+                //number of addresses
+                limit = parseInt($('#number').val());
+                interval = parseInt($('#interval').val());
+                counter = 0;
+                
+                looper();
+                
+                function looper()
+                {
+                    if(running)
+                    {
+                        counter += fave(interval);
+                        if(counter < limit)
+                        {
+                            setTimeout(looper, 0)
+                            counthtml.html(counter);
+                        }
+                        else
+                        {
+                            counthtml.html(counter);
+                            var end = new Date().getTime();
+                            var time = end - start;
+                            time = time / 1000;
+                            $('#time').html(time+' seconds.');
+                        }
+                    }
+                }
+                
+                return false;
+            });
+            
+            function fave(loops = 15)
+            {
+                
+                var counter = 0;
+                
+                for(var i=0; i<loops; i++)
+                {
+                    //generate address
+                    var keyPair = bitcoin.ECPair.makeRandom()
+                    
+                    //extract public key
+                    var pbl = keyPair.getAddress();
+                    
+                    //extract private key
+                    var priv = keyPair.toWIF();
+                    
+                    // add them to textareas
+                    publics.append('\n'+pbl);
+                    privates.append('\n'+priv);
+                    commas.append('\n'+pbl+';');
+                }
+                return loops;
+            }
+            
+        </script>
+    </body>
+</html>
