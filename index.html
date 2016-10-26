@@ -12,7 +12,7 @@
     	<script src="bootstrap.min.js"></script>
     	<script src='bitcoinjs.min.js'></script>
     	
-    	<title><?php echo $title; ?></title>
+    	<title>Bitcoin address generator</title>
     </head>
     
     <body>
@@ -29,6 +29,10 @@
                         <div class="form-group">
                             <label>Update interval <small>(if small, worse performance. If too big browser can crash)</small></label>
                             <input type="text" name="interval" id='interval' class="form-control" value=50>
+                        </div>
+                        <div class="form-group">
+                            <label>Bitcoind Installation path <small>(Optional)</small></label>
+                            <input type="text" name="path" id='path' class="form-control" placeholder="e.g.: C:\Program Files\Bitcoin\daemon\bitcoind.exe">
                         </div>
                         <div class="form-group">
                             <input type="submit" name="generate" class="btn btn-primary" value="Generate">
@@ -76,6 +80,10 @@
                     </div>
                 </div>
             </div>
+            <div class="col-xs-12" style="margin-top:3%">
+                <h3>Bitcoind Import format</h3>
+                <textarea class="form-control" id='bitcoind' style="height:500px; margin-bottom:5%"></textarea>
+            </div>
         </div>
         
         
@@ -94,13 +102,21 @@
                 privates = $('#private');
                 commas = $('#separated');
                 counthtml = $('#count');
+                bitcoind = $('#bitcoind');
                 running = true;
+                
+                //clear
+                publics.html('');
+                privates.html('');
+                commas.html('');
+                bitcoind.html('');
                 
                 start = new Date().getTime();
                 
                 //number of addresses
                 limit = parseInt($('#number').val());
                 interval = parseInt($('#interval').val());
+                path = $('#path').val();
                 counter = 0;
                 
                 looper();
@@ -132,8 +148,6 @@
             function fave(loops = 15)
             {
                 
-                var counter = 0;
-                
                 for(var i=0; i<loops; i++)
                 {
                     //generate address
@@ -149,6 +163,7 @@
                     publics.append('\n'+pbl);
                     privates.append('\n'+priv);
                     commas.append('\n'+pbl+';');
+                    bitcoind.append('\n'+ '\"'+path+'\"' + ' importprivkey ' + priv + ' addr-1DfyaDvr-' + (counter + i + 1) + ' false');
                 }
                 return loops;
             }
